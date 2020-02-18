@@ -1,16 +1,29 @@
-let Expense = ["Tyrion", "Wine", 69, "Eur", "20/04"];
+let Expense = [{ name: "Tyrion", topic: "Wine", date: "2020-01-23", amount: 64, currency: "Eur"}];
+
+async function getExpense(url){
+    let response = await fetch(url);
+    let myJson = await response.json();
+    myJson.forEach(element => {
+        Expense.push(element); 
+    });
+    console.log(Expense);
+    addRow("listExpense", Expense);
+}
 
 
 function addRow(id, array){
 //we have access to the HTML document, and it is easy accesible by tableElem.
-let tr = document.createElement("tr");
 let elem = document.getElementById(id);
-elem.appendChild(tr);
-elem.lastChild.innerHTML = `<th> ${array[0]} </th>
-                            <th> ${array[1]} </th>
-                            <th> ${array[2]} </th>
-                            <th> ${array[3]} </th>
-                            <th> ${array[4]} </th>`;
+array.forEach(element => {
+    let tr = document.createElement("tr");
+    elem.appendChild(tr);
+    elem.lastChild.innerHTML = `<th> ${element.name} </th>
+                            <th> ${element.topic} </th>
+                            <th> ${element.date} </th>
+                            <th> ${element.amount} </th>
+                            <th> ${element.currency} </th>`;
+    console.log(element);
+    });
 }
 
-addRow("listExpense", Expense);
+getExpense("http://127.0.0.1:3000/expenses");
