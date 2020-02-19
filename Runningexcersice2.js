@@ -1,4 +1,4 @@
-let Expense = [{ name: "Tyrion", topic: "Wine", date: "2020-01-23", amount: 64, currency: "Eur"}];
+let Expense = [{ name: "Tyrion", topic: "Wine", date: "2020-01-23", amount: 64, currency: "EURO"}];
 
 async function getExpense(url){
     let response = await fetch(url);
