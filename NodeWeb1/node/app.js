@@ -1,10 +1,13 @@
 const http = require('http');
 const fs=require("fs");
 const path=require("path");
+const querystring = require("querystring");
 
 const hostname = '127.0.0.1';
 const port = 3000;
-
+let expensesObj = {
+  expenses: []
+};
 
 //https://blog.todotnet.com/2018/11/simple-static-file-webserver-in-node-js/
 //https://stackoverflow.com/questions/16333790/node-js-quick-file-server-static-files-over-http
@@ -46,10 +49,29 @@ function fileResponse(filename,res){
     }
   })
 }
+
+
 const server = http.createServer((req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   let date=new Date();
   console.log("GOT: " + req.method + " " +req.url);
+
+  if (req.method == "POST") {
+      switch(req.url){
+        case "/addExpense":
+          console.log(req);
+          let post = processPost(req, res);
+          console.log(post);
+          res.writeHead(301,
+            {location: 'http://127.0.0.1:5500/RunningExcersize1.html'
+          });   
+          break;
+        default:  
+          console.log("Did Nothing");
+        break;
+      }
+  }  
+
   if(req.method=="GET"){
     switch(req.url){
       case "/":    
@@ -64,12 +86,27 @@ const server = http.createServer((req, res) => {
       res.end('\n');
     break;
     case "/expenses": 
-    date=new Date();
-    console.log(JSON.stringify(date));
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(expenses));
-    res.end('\n');
+      date=new Date();
+      console.log(JSON.stringify(date));
+      fs.readFileSync('expenseJson.json', 'utf8', (err, data) => {
+        if (err) throw err;
+        console.log(data);
+      });
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      fs.readFile('expenseJson.json', 'utf8',(err, data) => {
+        if (err){
+          console.log(err);
+        } else {
+          console.log('Reading JSON');
+          let responseExpenseJson = JSON.parse(data);
+          console.log(responseExpenseJson);
+          res.write(JSON.stringify(responseExpenseJson));
+          res.end('\n');
+        }
+      });
+      //res.write(JSON.stringify(expenses));
+      
   break;
     default:
       fileResponse(req.url,res);
@@ -103,7 +140,7 @@ function guessMimeType(fileName){
 }
 
 //
-let expenses=[
+/*let expenses=[
   {
       name:"Brian",
       topic:"Coca Cola",
@@ -127,11 +164,56 @@ let expenses=[
     }
   //name, topic, date, amount, and currency. 
   //Thu Feb 13 2020 11:08:44 GMT+0100 (GMT+01:00)
-]
+]*/
 
 server.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
+
+async function processPost (req, res) {
+  console.log("In Process")
+  if (req.method == "POST") {
+    console.log("Processing Post")
+    let body = "";
+    req.on("data", (data) => {
+      body += data;
+
+      if (body.length > 1e6) {
+        req.connection.destroy();
+        console.log("Destroying POST")
+      }
+    });
+
+    req.on("end", () => {
+      let post = querystring.parse(body);
+      console.log("Finishing POST")
+      console.log(post);
+      
+      fs.readFile('expenseJson.json', 'utf8',(err, data) => {
+        if (err){
+          console.log(err);
+        } else {
+          console.log('Updating JSON');
+          expensesObj = JSON.parse(data);
+          console.log(expensesObj.expenses);
+          expensesObj.expenses.push(post);
+          console.log(expensesObj.expenses);
+          let jsonExpense = JSON.stringify(expensesObj);
+          fs.writeFile('expenseJson.json', jsonExpense, 'utf8', (err, data) => {
+              if (err){
+                  console.log(err);
+              }
+          });
+        }
+      });
+      
+
+      return post;
+    })
+
+    
+  }
+}
 
 //https://www.w3schools.com/nodejs/nodejs_url.asp
 

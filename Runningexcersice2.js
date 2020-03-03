@@ -3,7 +3,7 @@ let Expense = [{ name: "Tyrion", topic: "Wine", date: "2020-01-23", amount: 64, 
 async function getExpense(url){
     let response = await fetch(url);
     let myJson = await response.json();
-    myJson.forEach(element => {
+    myJson.expenses.forEach(element => {
         Expense.push(element); 
     });
     console.log(Expense);
