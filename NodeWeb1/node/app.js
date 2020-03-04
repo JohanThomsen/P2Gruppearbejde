@@ -46,36 +46,46 @@ function fileResponse(filename,res){
     }
   })
 }
-const server = http.createServer((req, res) => {
+const server = http.createServer( async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   let date=new Date();
   console.log("GOT: " + req.method + " " +req.url);
   if(req.method=="GET"){
     switch(req.url){
       case "/":    
-       fileResponse("index.html",res);
-      break;
-    case "/date": 
-      date=new Date();
-      console.log(date);
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify(date));
-      res.end('\n');
-    break;
-    case "/expenses": 
-    date=new Date();
-    console.log(JSON.stringify(date));
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(expenses));
-    res.end('\n');
-  break;
-    default:
-      fileResponse(req.url,res);
-      break;
+        fileResponse("RunningExcersize1.html",res);
+        break;
+      case "/date": 
+        date=new Date();
+        console.log(date);
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.write(JSON.stringify(date));
+        res.end('\n');
+        break;
+      case "/expenses": 
+        date=new Date();
+        console.log(JSON.stringify(date));
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.write(JSON.stringify(expenses));
+        res.end('\n');
+        break;
+      default:
+        fileResponse(req.url, res);
+        break;
     }//switch
-  } 
+  } else if (req.method=="POST"){
+    
+    await req.on("data", chunk => {
+      let data = chunk.toString();
+      console.log(data);
+    });
+    fs.appendFile("./log.txt", data + "\n", function(err){
+      if (err) throw err;
+    });
+  }
+
 });
 
 //better alternative: use require('mmmagic') library

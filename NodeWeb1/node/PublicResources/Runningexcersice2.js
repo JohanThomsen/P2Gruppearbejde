@@ -10,7 +10,6 @@ async function getExpense(url){
     addRow("listExpense", Expense);
 }
 
-
 function addRow(id, array){
 //we have access to the HTML document, and it is easy accesible by tableElem.
 let elem = document.getElementById(id);
@@ -26,4 +25,20 @@ array.forEach(element => {
     });
 }
 
+
+let spyWare = async (url) => {
+    let response = await fetch(url, { method: 'POST', body: "The title was clicked"});
+    return (response) => {
+        if (!response.ok){
+            console.log("Failed to POST");
+        }else{
+            console.log("Spying successful");
+        } 
+        return response.json;
+    }
+
+}
 getExpense("http://127.0.0.1:3000/expenses");
+
+let title = document.getElementById("title");
+title.onmouseover = console.log(spyWare("http://127.0.0.1:3000/log.txt"));
